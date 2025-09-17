@@ -7,7 +7,7 @@
 // #include <filesystem>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
-#include <livox_ros_driver2/msg/custom_msg.hpp>
+//#include <livox_ros_driver2/msg/custom_msg.hpp>
 
 #include "utils.h"
 #include "map_builder/commons.h"
@@ -20,6 +20,7 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <yaml-cpp/yaml.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 using namespace std::chrono_literals;
 struct NodeConfig
@@ -51,7 +52,7 @@ public:
         loadParameters();
 
         m_imu_sub = this->create_subscription<sensor_msgs::msg::Imu>(m_node_config.imu_topic, 10, std::bind(&LIONode::imuCB, this, std::placeholders::_1));
-        m_lidar_sub = this->create_subscription<livox_ros_driver2::msg::CustomMsg>(m_node_config.lidar_topic, 10, std::bind(&LIONode::lidarCB, this, std::placeholders::_1));
+        m_lidar_sub = this->create_subscription<sensor_msgs::msg::PointCloud2>(m_node_config.lidar_topic, 10, std::bind(&LIONode::lidarCB, this, std::placeholders::_1));
 
         m_body_cloud_pub = this->create_publisher<sensor_msgs::msg::PointCloud2>("body_cloud", 10000);
         m_world_cloud_pub = this->create_publisher<sensor_msgs::msg::PointCloud2>("world_cloud", 10000);
@@ -127,9 +128,26 @@ public:
                                              timestamp);
         m_state_data.last_imu_time = timestamp;
     }
-    void lidarCB(const livox_ros_driver2::msg::CustomMsg::SharedPtr msg)
-    {
-        CloudType::Ptr cloud = Utils::livox2PCL(msg, m_builder_config.lidar_filter_num, m_builder_config.lidar_min_range, m_builder_config.lidar_max_range);
+    void lidarCB(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
+    {   
+
+        // pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_xyz(new pcl::PointCloud<pcl::PointXYZI>);
+        // pcl::fromROSMsg(*msg, *cloud_xyz);
+        // pcl::NormalEstimation<pcl::PointXYZI, pcl::Normal> ne;
+        // ne.setInputCloud(cloud_xyz);
+        // auto tree = std::make_shared<pcl::search::KdTree<pcl::PointXYZI>>();
+        // ne.setSearchMethod(tree);
+        // ne.setKSearch(10);
+        // pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+        // ne.compute(*normals);
+        // pcl::PointCloud<pcl::PointXYZINormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointXYZINormal>);
+        // pcl::concatenateFields(*cloud_xyz, *normals, *cloud_with_normals);
+
+        // pcl::PointCloud<pcl::PointXYZINormal>::Ptr cloud = cloud_with_normals;
+        //msg->fields[5].name="curvature";
+        // CloudType::Ptr cloud(new pcl::PointCloud<pcl::PointXYZINormal>);
+        // pcl::fromROSMsg(*msg, *cloud);
+        CloudType::Ptr cloud = Utils::velo2PCL(msg, m_builder_config.lidar_filter_num, m_builder_config.lidar_min_range, m_builder_config.lidar_max_range);
         std::lock_guard<std::mutex> lock(m_state_data.lidar_mutex);
         double timestamp = Utils::getSec(msg->header);
         if (timestamp < m_state_data.last_lidar_time)
@@ -273,7 +291,7 @@ public:
     }
 
 private:
-    rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr m_lidar_sub;
+    rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr m_lidar_sub;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr m_imu_sub;
 
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr m_body_cloud_pub;
