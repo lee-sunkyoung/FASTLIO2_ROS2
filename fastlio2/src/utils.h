@@ -9,6 +9,8 @@
 #include <builtin_interfaces/msg/time.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <pcl/features/normal_3d.h>
+#include <pcl/search/kdtree.h>
 
 #define RESET "\033[0m"
 #define BLACK "\033[30m"  /* Black */

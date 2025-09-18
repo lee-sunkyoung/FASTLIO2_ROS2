@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(fastlio2)
 
-set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};/home/lsk/ws_livox/install")
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};/home/robit/ws_livox/install")
 
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 17)
