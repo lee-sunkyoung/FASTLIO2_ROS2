@@ -25,11 +25,30 @@
 pcl
 Eigen
 sophus
-gtsam
+gtsam(optional for LC)
+```
+
+```shell
+sudo apt install libpcap-dev libpcl* pcl-tools ros-humble-pcl-ros -y
+sudo apt install ros-humble-gtsam -y
+```
+ros-humble-gtsam-dbgsym(optional)
+
+
+### Check your version
+eigen
+```shell
+pkg-config --modversion eigen3
+```
+gtsam (select one)
+```shell
+gtsam_version
+pkg-config --modversion gtsam
 ```
 
 ### Install Sophus
 ```shell
+cd
 git clone https://github.com/strasdat/Sophus.git
 cd Sophus
 git checkout 1.22.10
